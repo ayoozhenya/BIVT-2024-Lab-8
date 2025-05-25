@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace Lab_8
 {
     public class Green_4 : Green
@@ -24,46 +19,42 @@ namespace Lab_8
                 return;
             }
 
-            string[] surnames = Input.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            string[] surnames = Input.Split(
+                new char[] { ',' },
+                StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
+            );
 
-            for (int i = 0; i < surnames.Length; ++i)
+            bool[] isDuplicate = new bool[surnames.Length];
+            int uniqueCount = 0;
+
+            for (int i = 0; i < surnames.Length; i++)
             {
-                for (int j = i + 1; j < surnames.Length; ++j)
+                if (!isDuplicate[i])
                 {
-                    string lFW = surnames[i].ToLower();
-                    string lSW = surnames[j].ToLower();
-                    int s = 0;
-                    for (int k = 0; k < Math.Min(surnames[i].Length, surnames[j].Length); ++k)
+                    uniqueCount++;
+                    for (int j = i + 1; j < surnames.Length; j++)
                     {
-                        if (lFW[k] > lSW[k])
+                        if (surnames[i].ToLower() == surnames[j].ToLower())
                         {
-                            string tempW = surnames[i];
-                            surnames[i] = surnames[j];
-                            surnames[j] = tempW;
-                            break;
-                        }
-                        else if (lFW[k] < lSW[k])
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            s += 1;
-                        }
-                    }
-                    if (s == Math.Min(surnames[i].Length, surnames[j].Length))
-                    {
-                        if (surnames[i].Length > surnames[j].Length)
-                        {
-                            string tempW = surnames[i];
-                            surnames[i] = surnames[j];
-                            surnames[j] = tempW;
+                            isDuplicate[j] = true;
                         }
                     }
                 }
             }
 
-            _output = surnames;
+            string[] uniqueSurnames = new string[uniqueCount];
+            int index = 0;
+            for (int i = 0; i < surnames.Length; i++)
+            {
+                if (!isDuplicate[i])
+                {
+                    uniqueSurnames[index++] = surnames[i];
+                }
+            }
+
+            Array.Sort(uniqueSurnames, StringComparer.Ordinal);
+
+            _output = uniqueSurnames;
         }
 
         public override string ToString()
@@ -83,7 +74,6 @@ namespace Lab_8
                     result += Environment.NewLine;
                 }
             }
-
             return result;
         }
     }

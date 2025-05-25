@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-
 namespace Lab_8
 {
     public class Green_1 : Green
     {
         private (char, double)[] _output;
         public (char, double)[] Output => _output;
+
         public Green_1(string input) : base(input)
         {
             _output = null;
@@ -17,28 +14,36 @@ namespace Lab_8
 
         public override void Review()
         {
-            string t = Input.ToLower();
-            char[] l = new char[]
+            if (string.IsNullOrEmpty(Input))
+            {
+                _output = new (char, double)[0];
+                return;
+            }
+
+            string text = Input.ToLower();
+
+            char[] letters = new char[]
             {
                 'а', 'б', 'в', 'г', 'д', 'е', 'ё', 'ж', 'з', 'и', 'й',
                 'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у', 'ф',
                 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'
             };
-            int[] count = new int[l.Length];
+
+            int[] count = new int[letters.Length];
             int total = 0;
 
-            for (int i = 0; i < t.Length; i++)
+            for (int i = 0; i < text.Length; i++)
             {
-                char a = t[i];
-                for (int j = 0; j < l.Length; j++)
+                char c = text[i];
+                for (int j = 0; j < letters.Length; j++)
                 {
-                    if (a == l[j])
+                    if (c == letters[j])
                     {
                         count[j]++;
+                        total++;
                         break;
                     }
                 }
-                if (char.IsLetter(a)) { total++; }
             }
 
             if (total == 0)
@@ -47,25 +52,25 @@ namespace Lab_8
                 return;
             }
 
-            int k = 0;
-            for (int i = 0; i < count.Length; i++)
+            int resultCount = 0;
+            for (int i = 0; i < letters.Length; i++)
             {
                 if (count[i] > 0)
                 {
-                    k++;
+                    resultCount++;
                 }
             }
 
-            (char, double)[] result = new (char, double)[k];
+            (char letter, double freq)[] result = new (char, double)[resultCount];
             int index = 0;
-            for (int i = 0; i < l.Length; i++)
+            for (int i = 0; i < letters.Length; i++)
             {
                 if (count[i] > 0)
                 {
-                    result[index] = (l[i], (double)count[i] / total);
-                    index++;
+                    result[index++] = (letters[i], (double)count[i] / total);
                 }
             }
+
             _output = result;
         }
 
@@ -75,8 +80,13 @@ namespace Lab_8
             {
                 return string.Empty;
             }
-            return string.Join(Environment.NewLine, Output.Select(pair => $"{pair.Item1} - {pair.Item2:F4}"));
-        }
 
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < _output.Length; i++)
+            {
+                sb.AppendLine($"{_output[i].letter} - {_output[i].freq:F4}");
+            }
+            return sb.ToString().Trim();
+        }
     }
 }
