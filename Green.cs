@@ -1,19 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Lab_8
+public abstract class Green
 {
-    abstract public class Green
+    private string _input;
+
+    public string Input => _input;
+
+    protected Green(string input)
     {
-        private string _input;
-        public string Input { get { return _input; } }
-        public Green(string input)
-        {
-            _input = input;
-        }
-        public abstract void Review();
+        _input = input ?? throw new ArgumentNullException(nameof(input));
     }
+
+    public abstract void Review();
+    public abstract object Output { get; }
 }
