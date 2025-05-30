@@ -1,16 +1,18 @@
 ﻿using System;
-
-public abstract class Green
+namespace Lab_8
 {
-    private string _input;
-
-    public string Input => _input;
-
-    protected Green(string input)
+    public abstract class Green
     {
-        _input = input ?? throw new ArgumentNullException(nameof(input));
-    }
+        private string _input;
 
-    public abstract void Review();
-    public abstract object Output { get; }
+        public string Input => _input;
+
+        protected Green(string input)
+        {
+            _input = input ?? throw new ArgumentNullException(nameof(input));
+        }
+
+        public abstract void Review();
+        public abstract object Output { get; }
+    }
 }
