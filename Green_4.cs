@@ -1,86 +1,83 @@
 ﻿using System;
+using System.Text;
+
 namespace Lab_8
 {
-    public class Green4 : Green
+    public class Green_4 : Green
     {
-        private string[] _output = Array.Empty<string>();
+        private string[] _output;
+        public string[] Output => _output;
 
-        public Green4(string input) : base(input)
-        {
-        }
+        public Green_4(string input) : base(input) { }
 
         public override void Review()
         {
-            string[] names = SplitNames();
-            SortNames(names);
-
-            _output = names;
-        }
-
-        private string[] SplitNames()
-        {
-            int count = 0;
-            for (int i = 0; i < Input.Length; i++)
+            if (string.IsNullOrEmpty(Input))
             {
-                if (Input[i] == ',') count++;
+                _output = new string[0];
+                return;
             }
 
-            string[] names = new string[count + 1];
+            string[] temp = new string[Input.Length]; 
+            int surnameCount = 0;
             int start = 0;
-            int index = 0;
+            bool inSurname = false;
 
             for (int i = 0; i <= Input.Length; i++)
             {
-                char c = i < Input.Length ? Input[i] : ',';
-                if (c == ',')
+                if (i == Input.Length || Input[i] == ',')
                 {
-                    while (start < i && char.IsWhiteSpace(Input[start])) start++;
-                    while (i > start && char.IsWhiteSpace(Input[i - 1])) i--;
-
-                    names[index++] = Input.Substring(start, i - start);
-                    start = i + 1;
+                    if (inSurname)
+                    {
+                        string surname = Input.Substring(start, i - start).Trim();
+                        if (surname.Length > 0 && !ContainsSurname(temp, surnameCount, surname))
+                        {
+                            temp[surnameCount++] = surname;
+                        }
+                        inSurname = false;
+                    }
+                    if (i < Input.Length && Input[i] == ',') start = i + 1;
+                }
+                else if (!char.IsWhiteSpace(Input[i]) && !inSurname)
+                {
+                    start = i;
+                    inSurname = true;
                 }
             }
 
-            return names;
-        }
+            _output = new string[surnameCount];
+            Array.Copy(temp, _output, surnameCount);
 
-        private void SortNames(string[] names)
-        {
-            for (int i = 0; i < names.Length - 1; i++)
+            for (int i = 0; i < _output.Length - 1; i++)
             {
-                for (int j = 0; j < names.Length - i - 1; j++)
+                for (int j = 0; j < _output.Length - i - 1; j++)
                 {
-                    if (CompareStrings(names[j], names[j + 1]) > 0)
+                    if (string.Compare(_output[j], _output[j + 1], StringComparison.Ordinal) > 0)
                     {
-                        (names[j], names[j + 1]) = (names[j + 1], names[j]);
+                        string tempSurname = _output[j];
+                        _output[j] = _output[j + 1];
+                        _output[j + 1] = tempSurname;
                     }
                 }
             }
         }
 
-        private int CompareStrings(string a, string b)
+        private bool ContainsSurname(string[] surnames, int count, string surname)
         {
-            int len = Math.Min(a.Length, b.Length);
-            for (int i = 0; i < len; i++)
+            for (int i = 0; i < count; i++)
             {
-                char ac = char.ToLower(a[i]);
-                char bc = char.ToLower(b[i]);
-                if (ac != bc) return ac - bc;
+                if (string.Equals(surnames[i], surname, StringComparison.OrdinalIgnoreCase))
+                    return true;
             }
-
-            return a.Length - b.Length;
+            return false;
         }
-
-        public override object Output => _output;
 
         public override string ToString()
         {
-            string result = "";
-            for (int i = 0; i < _output.Length; i++)
-                result += _output[i] + "\n";
+            if (_output == null || _output.Length == 0)
+                return string.Empty;
 
-            return result.TrimEnd('\n');
+            return string.Join(Environment.NewLine, _output);
         }
     }
 }

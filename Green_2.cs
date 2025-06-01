@@ -1,100 +1,126 @@
 ﻿using System;
+using System.Text;
+
 namespace Lab_8
 {
-    public class Green2 : Green
+    public class Green_2 : Green
     {
-        private char[] _output = Array.Empty<char>();
-        private int[] _counts = new int[32];
+        private char[] _output;
+        public char[] Output => _output;
+        private static readonly char[] russianLetters = {
+            'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з', 'и', 'й',
+            'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у',
+            'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'
+        };
 
-        public Green2(string input) : base(input)
-        {
-        }
+        public Green_2(string input) : base(input) { }
 
         public override void Review()
         {
-            bool wordStart = true;
-            for (int i = 0; i < Input.Length; i++)
+            if (string.IsNullOrEmpty(Input))
             {
-                char c = char.ToLower(Input[i]);
+                _output = new char[0];
+                return;
+            }
 
-                if (wordStart && ((c >= 'а' && c <= 'я') || c == 'ё'))
+            string text = Input.ToLower();
+            char[] delimiters = { ' ', '.', '!', '?', ',', ':', '\"', ';', '–', '(', ')', '[', ']', '{', '}', '/' };
+            int[] counts = new int[russianLetters.Length];
+            int totalWords = 0;
+
+            bool inWord = false;
+            char firstChar = '\0';
+            foreach (char c in text + " ")
+            {
+                bool isDelimiter = false;
+                foreach (char d in delimiters)
                 {
-                    if (c >= 'а' && c <= 'я')
-                        _counts[c - 'а']++;
-                    else if (c == 'ё')
-                        _counts[31]++;
-                    wordStart = false;
+                    if (c == d)
+                    {
+                        isDelimiter = true;
+                        break;
+                    }
                 }
-                else if (!char.IsWhiteSpace(c) && !IsPunctuation(c))
+
+                if (isDelimiter || c == ' ')
                 {
-                    wordStart = false;
+                    if (inWord && firstChar != '\0')
+                    {
+                        for (int i = 0; i < russianLetters.Length; i++)
+                        {
+                            if (firstChar == russianLetters[i])
+                            {
+                                counts[i]++;
+                                totalWords++;
+                                break;
+                            }
+                        }
+                    }
+                    inWord = false;
+                    firstChar = '\0';
                 }
-                else
+                else if (!inWord)
                 {
-                    wordStart = true;
+                    firstChar = c;
+                    inWord = true;
                 }
             }
 
-            char[] letters = new char[32];
-            for (int i = 0; i < 31; i++) letters[i] = (char)('а' + i);
-            letters[31] = 'ё';
-
-            for (int i = 0; i < 32; i++)
+            if (totalWords == 0)
             {
-                for (int j = i + 1; j < 32; j++)
-                {
-                    bool swap = false;
-                    if (_counts[i] < _counts[j]) swap = true;
-                    else if (_counts[i] == _counts[j] && letters[i] > letters[j]) swap = true;
+                _output = new char[0];
+                return;
+            }
 
-                    if (swap)
+            int resultCount = 0;
+            for (int i = 0; i < counts.Length; i++)
+            {
+                if (counts[i] > 0) resultCount++;
+            }
+
+            (char, int)[] letters = new (char, int)[resultCount];
+            int index = 0;
+            for (int i = 0; i < russianLetters.Length; i++)
+            {
+                if (counts[i] > 0)
+                {
+                    letters[index++] = (russianLetters[i], counts[i]);
+                }
+            }
+
+            for (int i = 0; i < letters.Length - 1; i++)
+            {
+                for (int j = 0; j < letters.Length - i - 1; j++)
+                {
+                    if (letters[j].Item2 < letters[j + 1].Item2 ||
+                       (letters[j].Item2 == letters[j + 1].Item2 && letters[j].Item1 > letters[j + 1].Item1))
                     {
-                        (letters[i], letters[j]) = (letters[j], letters[i]);
-                        (_counts[i], _counts[j]) = (_counts[j], _counts[i]);
+                        var temp = letters[j];
+                        letters[j] = letters[j + 1];
+                        letters[j + 1] = temp;
                     }
                 }
             }
 
-            int count = 0;
-            for (int i = 0; i < 32; i++) if (_counts[i] > 0) count++;
-
-            char[] res = new char[count];
-            int idx = 0;
-            for (int i = 0; i < 32; i++)
+            _output = new char[letters.Length];
+            for (int i = 0; i < letters.Length; i++)
             {
-                if (_counts[i] > 0)
-                    res[idx++] = letters[i];
+                _output[i] = letters[i].Item1;
             }
-
-            _output = res;
         }
-
-        private bool IsPunctuation(char c)
-        {
-            char[] punct = {
-                '.', '!', '?', ',', ':', '\"', ';', '–', '-', '(', ')',
-                '[', ']', '{', '}', '/', '\'', '`', '«', '»'
-            };
-
-            for (int i = 0; i < punct.Length; i++)
-                if (c == punct[i])
-                    return true;
-            return false;
-        }
-
-        public override object Output => _output;
 
         public override string ToString()
         {
-            string result = "";
+            if (_output == null || _output.Length == 0)
+                return string.Empty;
+
+            StringBuilder sb = new StringBuilder();
             for (int i = 0; i < _output.Length; i++)
             {
-                result += _output[i];
-                if (i < _output.Length - 1)
-                    result += ", ";
+                if (i > 0) sb.Append(", ");
+                sb.Append(_output[i]);
             }
-
-            return result;
+            return sb.ToString();
         }
     }
 }

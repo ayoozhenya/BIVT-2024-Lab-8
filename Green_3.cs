@@ -1,71 +1,114 @@
 ﻿using System;
+using System.Text;
+
 namespace Lab_8
 {
-    public class Green3 : Green
+    public class Green_3 : Green
     {
-        private string[] _output = Array.Empty<string>();
-        private string _substring;
+        private string[] _output;
+        private string _given;
 
-        public Green3(string input, string substring) : base(input)
+        public string[] Output => _output;
+
+        public Green_3(string input, string given) : base(input)
         {
-            _substring = substring?.ToLower() ?? throw new ArgumentNullException(nameof(substring));
+            _given = given ?? throw new ArgumentNullException(nameof(given));
         }
 
         public override void Review()
         {
-            var words = ExtractWords();
-            var result = new string[words.Length];
-            int count = 0;
-
-            for (int i = 0; i < words.Length; i++)
+            if (string.IsNullOrEmpty(Input) || string.IsNullOrEmpty(_given))
             {
-                if (ContainsIgnoreCase(words[i], _substring))
+                _output = new string[0];
+                return;
+            }
+
+            string text = Input.ToLower();
+            string given = _given.ToLower().Trim();
+            char[] delimiters = { ' ', '.', '!', '?', ',', ':', '\"', ';', '–', '(', ')', '[', ']', '{', '}', '/' };
+
+            string[] temp = new string[Input.Length];
+            int wordCount = 0;
+
+            int start = 0;
+            bool inWord = false;
+            for (int i = 0; i <= text.Length; i++)
+            {
+                if (i == text.Length)
                 {
-                    result[count++] = words[i];
+                    if (inWord)
+                    {
+                        string word = text.Substring(start, i - start);
+                        if (ContainsSubstring(word, given))
+                        {
+                            if (!ContainsWord(temp, wordCount, word))
+                            {
+                                temp[wordCount++] = word;
+                            }
+                        }
+                    }
+                    break;
+                }
+
+                bool isDelimiter = false;
+                foreach (char d in delimiters)
+                {
+                    if (text[i] == d)
+                    {
+                        isDelimiter = true;
+                        break;
+                    }
+                }
+
+                if (isDelimiter)
+                {
+                    if (inWord)
+                    {
+                        string word = text.Substring(start, i - start);
+                        if (ContainsSubstring(word, given))
+                        {
+                            if (!ContainsWord(temp, wordCount, word))
+                            {
+                                temp[wordCount++] = word;
+                            }
+                        }
+                        inWord = false;
+                    }
+                }
+                else if (!inWord)
+                {
+                    start = i;
+                    inWord = true;
                 }
             }
 
-            Array.Resize(ref result, count);
-            _output = result;
-        }
+            _output = new string[wordCount];
+            Array.Copy(temp, _output, wordCount);
 
-        private string[] ExtractWords()
-        {
-            var words = new string[Input.Length / 2];
-            int wordStart = -1;
-            int count = 0;
-
-            for (int i = 0; i <= Input.Length; i++)
+            for (int i = 0; i < _output.Length - 1; i++)
             {
-                char c = i < Input.Length ? char.ToLower(Input[i]) : '\0';
-                bool isLetterOrHyphen = (c >= 'a' && c <= 'z') ||
-                                        (c >= 'а' && c <= 'я') ||
-                                        c == 'ё' || c == '-' || c == '\'';
-
-                if (wordStart == -1 && isLetterOrHyphen)
+                for (int j = 0; j < _output.Length - i - 1; j++)
                 {
-                    wordStart = i;
-                }
-                else if (wordStart != -1 && !isLetterOrHyphen)
-                {
-                    words[count++] = Input.Substring(wordStart, i - wordStart);
-                    wordStart = -1;
+                    if (string.Compare(_output[j], _output[j + 1], StringComparison.Ordinal) > 0)
+                    {
+                        string tempWord = _output[j];
+                        _output[j] = _output[j + 1];
+                        _output[j + 1] = tempWord;
+                    }
                 }
             }
-
-            var result = new string[count];
-            Array.Copy(words, result, count);
-            return result;
         }
 
-        private bool ContainsIgnoreCase(string text, string sub)
+        private bool ContainsSubstring(string word, string substring)
         {
-            for (int i = 0; i <= text.Length - sub.Length; i++)
+            if (substring.Length > word.Length) return false;
+
+            for (int i = 0; i <= word.Length - substring.Length; i++)
             {
                 bool match = true;
-                for (int j = 0; j < sub.Length; j++)
+                for (int j = 0; j < substring.Length; j++)
                 {
-                    if (char.ToLower(text[i + j]) != sub[j])
+                    if (word[i + j] != substring[j])
                     {
                         match = false;
                         break;
@@ -76,15 +119,21 @@ namespace Lab_8
             return false;
         }
 
-        public override object Output => _output;
+        private bool ContainsWord(string[] words, int count, string word)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (words[i] == word) return true;
+            }
+            return false;
+        }
 
         public override string ToString()
         {
-            string result = "";
-            for (int i = 0; i < _output.Length; i++)
-                result += _output[i] + "\n";
+            if (_output == null || _output.Length == 0)
+                return string.Empty;
 
-            return result.TrimEnd('\n');
+            return string.Join(Environment.NewLine, _output);
         }
     }
 }

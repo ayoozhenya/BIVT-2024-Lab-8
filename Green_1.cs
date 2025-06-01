@@ -1,68 +1,79 @@
 ﻿using System;
+using System.Text;
+
 namespace Lab_8
 {
-    public class Green1 : Green
+    public class Green_1 : Green
     {
-        private (char Letter, double Frequency)[] _output = Array.Empty<(char, double)>();
+        private (char, double)[] _output;
+        public (char, double)[] Output => _output;
+        private static readonly char[] russianLetters = {
+            'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з', 'и', 'й',
+            'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у',
+            'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'
+        };
 
-        public Green1(string input) : base(input)
-        {
-        }
+        public Green_1(string input) : base(input) { }
 
         public override void Review()
         {
-            int[] counts = new int[32];
+            if (string.IsNullOrEmpty(Input))
+            {
+                _output = new (char, double)[0];
+                return;
+            }
+
+            string text = Input.ToLower();
+            int[] counts = new int[russianLetters.Length];
             int totalLetters = 0;
 
-            for (int i = 0; i < Input.Length; i++)
+            foreach (char c in text)
             {
-                char c = char.ToLower(Input[i]);
-                if (c >= 'а' && c <= 'я')
+                for (int i = 0; i < russianLetters.Length; i++)
                 {
-                    int index = c - 'а';
-                    counts[index]++;
-                    totalLetters++;
-                }
-                else if (c == 'ё')
-                {
-                    counts[31]++;
-                    totalLetters++;
+                    if (c == russianLetters[i])
+                    {
+                        counts[i]++;
+                        totalLetters++;
+                        break;
+                    }
                 }
             }
 
-            var result = new (char Letter, double Frequency)[32];
+            if (totalLetters == 0)
+            {
+                _output = new (char, double)[0];
+                return;
+            }
 
-            for (int i = 0; i < 31; i++)
+            int resultCount = 0;
+            for (int i = 0; i < counts.Length; i++)
+            {
+                if (counts[i] > 0) resultCount++;
+            }
+
+            _output = new (char, double)[resultCount];
+            int index = 0;
+            for (int i = 0; i < russianLetters.Length; i++)
             {
                 if (counts[i] > 0)
                 {
-                    char letter = (char)('а' + i);
-                    double freq = Math.Round((double)counts[i] / totalLetters, 4);
-                    result[i] = (letter, freq);
+                    _output[index++] = (russianLetters[i], Math.Round((double)counts[i] / totalLetters, 4));
                 }
             }
-
-            if (counts[31] > 0)
-            {
-                result[31] = ('ё', Math.Round((double)counts[31] / totalLetters, 4));
-            }
-
-            _output = result;
         }
-
-        public override object Output => _output;
 
         public override string ToString()
         {
-            string result = "";
-            for (int i = 0; i < _output.Length; i++)
-            {
-                var (Letter, Frequency) = _output[i];
-                if (Frequency > 0)
-                    result += $"{Letter} - {Frequency:F4}\n";
-            }
+            if (_output == null || _output.Length == 0)
+                return string.Empty;
 
-            return result.TrimEnd('\n');
+            StringBuilder sb = new StringBuilder();
+            foreach (var item in _output)
+            {
+                sb.AppendLine($"{item.Item1} - {item.Item2:F4}");
+            }
+            return sb.ToString().Trim();
         }
     }
 }
