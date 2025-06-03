@@ -7,8 +7,20 @@ namespace Lab_8
     {
         private string[] _output;
         private string _given;
+        private bool _outputSet = false;
 
-        public string[] Output => _output;
+        public string[] Output
+        {
+            get => _output;
+            private set
+            {
+                if (!_outputSet)
+                {
+                    _output = value;
+                    _outputSet = true;
+                }
+            }
+        }
 
         public Green_3(string input, string given) : base(input)
         {
@@ -17,9 +29,10 @@ namespace Lab_8
 
         public override void Review()
         {
+            if (_outputSet) return;
             if (string.IsNullOrEmpty(Input) || string.IsNullOrEmpty(_given))
             {
-                _output = new string[0];
+                Output = new string[0];
                 return;
             }
 
@@ -82,21 +95,8 @@ namespace Lab_8
                 }
             }
 
-            _output = new string[wordCount];
-            Array.Copy(temp, _output, wordCount);
-
-            for (int i = 0; i < _output.Length - 1; i++)
-            {
-                for (int j = 0; j < _output.Length - i - 1; j++)
-                {
-                    if (string.Compare(_output[j], _output[j + 1], StringComparison.Ordinal) > 0)
-                    {
-                        string tempWord = _output[j];
-                        _output[j] = _output[j + 1];
-                        _output[j + 1] = tempWord;
-                    }
-                }
-            }
+            Output = new string[wordCount];
+            Array.Copy(temp, Output, wordCount);
         }
 
         private bool ContainsSubstring(string word, string substring)

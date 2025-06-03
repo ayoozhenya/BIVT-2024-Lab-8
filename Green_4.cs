@@ -6,19 +6,34 @@ namespace Lab_8
     public class Green_4 : Green
     {
         private string[] _output;
-        public string[] Output => _output;
+        private bool _outputSet = false;
+
+        public string[] Output
+        {
+            get => _output;
+            private set
+            {
+                if (!_outputSet)
+                {
+                    _output = value;
+                    _outputSet = true;
+                }
+            }
+        }
 
         public Green_4(string input) : base(input) { }
 
         public override void Review()
         {
+            if (_outputSet) return;
+
             if (string.IsNullOrEmpty(Input))
             {
-                _output = new string[0];
+                Output = new string[0];
                 return;
             }
 
-            string[] temp = new string[Input.Length]; 
+            string[] temp = new string[Input.Length];
             int surnameCount = 0;
             int start = 0;
             bool inSurname = false;
@@ -45,28 +60,30 @@ namespace Lab_8
                 }
             }
 
-            _output = new string[surnameCount];
-            Array.Copy(temp, _output, surnameCount);
+            var output = new string[surnameCount];
+            Array.Copy(temp, output, surnameCount);
 
-            for (int i = 0; i < _output.Length - 1; i++)
+            for (int i = 0; i < output.Length - 1; i++)
             {
-                for (int j = 0; j < _output.Length - i - 1; j++)
+                for (int j = 0; j < output.Length - i - 1; j++)
                 {
-                    if (string.Compare(_output[j], _output[j + 1], StringComparison.Ordinal) > 0)
+                    if (string.Compare(output[j], output[j + 1], StringComparison.Ordinal) > 0)
                     {
-                        string tempSurname = _output[j];
-                        _output[j] = _output[j + 1];
-                        _output[j + 1] = tempSurname;
+                        string tempSurname = output[j];
+                        output[j] = output[j + 1];
+                        output[j + 1] = tempSurname;
                     }
                 }
             }
+
+            Output = output;
         }
 
         private bool ContainsSurname(string[] surnames, int count, string surname)
         {
             for (int i = 0; i < count; i++)
             {
-                if (string.Equals(surnames[i], surname, StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(surnames[i], surname, StringComparison.Ordinal))
                     return true;
             }
             return false;

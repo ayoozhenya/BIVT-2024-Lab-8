@@ -1,31 +1,42 @@
 ﻿using System;
 using System.Text;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Lab_8
 {
     public class Green_2 : Green
     {
         private char[] _output;
-        public char[] Output => _output;
-        private static readonly char[] russianLetters = {
-            'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з', 'и', 'й',
-            'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у',
-            'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'
-        };
+        private bool _outputSet = false;
+        public char[] Output
+        {
+            get => _output;
+            private set
+            {
+                if (!_outputSet)
+                {
+                    _output = value;
+                    _outputSet = true;
+                }
+            }
+        }
 
         public Green_2(string input) : base(input) { }
 
         public override void Review()
         {
+            if (_outputSet) return;
+
             if (string.IsNullOrEmpty(Input))
             {
-                _output = new char[0];
+                Output = new char[0];
                 return;
             }
 
             string text = Input.ToLower();
             char[] delimiters = { ' ', '.', '!', '?', ',', ':', '\"', ';', '–', '(', ')', '[', ']', '{', '}', '/' };
-            int[] counts = new int[russianLetters.Length];
+            Dictionary<char, int> counts = new Dictionary<char, int>();
             int totalWords = 0;
 
             bool inWord = false;
@@ -46,15 +57,11 @@ namespace Lab_8
                 {
                     if (inWord && firstChar != '\0')
                     {
-                        for (int i = 0; i < russianLetters.Length; i++)
-                        {
-                            if (firstChar == russianLetters[i])
-                            {
-                                counts[i]++;
-                                totalWords++;
-                                break;
-                            }
-                        }
+                        if (counts.ContainsKey(firstChar))
+                            counts[firstChar]++;
+                        else
+                            counts[firstChar] = 1;
+                        totalWords++;
                     }
                     inWord = false;
                     firstChar = '\0';
@@ -68,45 +75,19 @@ namespace Lab_8
 
             if (totalWords == 0)
             {
-                _output = new char[0];
+                Output = new char[0];
                 return;
             }
 
-            int resultCount = 0;
-            for (int i = 0; i < counts.Length; i++)
+            var letters = counts.ToList();
+            letters.Sort((a, b) =>
             {
-                if (counts[i] > 0) resultCount++;
-            }
+                int cmp = b.Value.CompareTo(a.Value);
+                if (cmp == 0) return a.Key.CompareTo(b.Key);
+                return cmp;
+            });
 
-            (char, int)[] letters = new (char, int)[resultCount];
-            int index = 0;
-            for (int i = 0; i < russianLetters.Length; i++)
-            {
-                if (counts[i] > 0)
-                {
-                    letters[index++] = (russianLetters[i], counts[i]);
-                }
-            }
-
-            for (int i = 0; i < letters.Length - 1; i++)
-            {
-                for (int j = 0; j < letters.Length - i - 1; j++)
-                {
-                    if (letters[j].Item2 < letters[j + 1].Item2 ||
-                       (letters[j].Item2 == letters[j + 1].Item2 && letters[j].Item1 > letters[j + 1].Item1))
-                    {
-                        var temp = letters[j];
-                        letters[j] = letters[j + 1];
-                        letters[j + 1] = temp;
-                    }
-                }
-            }
-
-            _output = new char[letters.Length];
-            for (int i = 0; i < letters.Length; i++)
-            {
-                _output[i] = letters[i].Item1;
-            }
+            Output = letters.Select(x => x.Key).ToArray();
         }
 
         public override string ToString()

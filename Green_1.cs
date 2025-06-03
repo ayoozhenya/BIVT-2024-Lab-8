@@ -6,7 +6,19 @@ namespace Lab_8
     public class Green_1 : Green
     {
         private (char, double)[] _output;
-        public (char, double)[] Output => _output;
+        private bool _outputSet = false;
+        public (char, double)[] Output
+        {
+            get => _output;
+            private set
+            {
+                if (!_outputSet)
+                {
+                    _output = value;
+                    _outputSet = true;
+                }
+            }
+        }
         private static readonly char[] russianLetters = {
             'а', 'б', 'в', 'г', 'д', 'е', 'ж', 'з', 'и', 'й',
             'к', 'л', 'м', 'н', 'о', 'п', 'р', 'с', 'т', 'у',
@@ -17,9 +29,11 @@ namespace Lab_8
 
         public override void Review()
         {
+            if (_outputSet) return;
+
             if (string.IsNullOrEmpty(Input))
             {
-                _output = new (char, double)[0];
+                Output = new (char, double)[0];
                 return;
             }
 
@@ -42,7 +56,7 @@ namespace Lab_8
 
             if (totalLetters == 0)
             {
-                _output = new (char, double)[0];
+                Output = new (char, double)[0];
                 return;
             }
 
@@ -52,15 +66,17 @@ namespace Lab_8
                 if (counts[i] > 0) resultCount++;
             }
 
-            _output = new (char, double)[resultCount];
+            var output = new (char, double)[resultCount];
             int index = 0;
             for (int i = 0; i < russianLetters.Length; i++)
             {
                 if (counts[i] > 0)
                 {
-                    _output[index++] = (russianLetters[i], Math.Round((double)counts[i] / totalLetters, 4));
+                    output[index++] = (russianLetters[i], (double)counts[i] / totalLetters);
                 }
             }
+
+            Output = output;
         }
 
         public override string ToString()
