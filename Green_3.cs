@@ -25,6 +25,7 @@ namespace Lab_8
         public Green_3(string input, string given) : base(input)
         {
             _given = given ?? throw new ArgumentNullException(nameof(given));
+            Review(); // Вызов анализа после инициализации полей
         }
 
         public override void Review()

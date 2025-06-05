@@ -22,7 +22,10 @@ namespace Lab_8
             }
         }
 
-        public Green_2(string input) : base(input) { }
+        public Green_2(string input) : base(input)
+        {
+            Review(); // Вызов анализа после инициализации
+        }
 
         public override void Review()
         {

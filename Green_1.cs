@@ -25,7 +25,10 @@ namespace Lab_8
             'ф', 'х', 'ц', 'ч', 'ш', 'щ', 'ъ', 'ы', 'ь', 'э', 'ю', 'я'
         };
 
-        public Green_1(string input) : base(input) { }
+        public Green_1(string input) : base(input)
+        {
+            Review(); // Вызов анализа после инициализации
+        }
 
         public override void Review()
         {
