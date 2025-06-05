@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Linq;
 
 namespace Lab_8
 {
@@ -23,7 +24,7 @@ namespace Lab_8
 
         public Green_4(string input) : base(input)
         {
-            Review(); // Вызов анализа после инициализации
+            Review();
         }
 
         public override void Review()
@@ -32,64 +33,18 @@ namespace Lab_8
 
             if (string.IsNullOrEmpty(Input))
             {
-                Output = new string[0];
+                Output = null;
                 return;
             }
 
-            string[] temp = new string[Input.Length];
-            int surnameCount = 0;
-            int start = 0;
-            bool inSurname = false;
+            var surnames = Input.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(s => s.Trim())
+                .Where(s => !string.IsNullOrEmpty(s))
+                .Distinct()
+                .OrderBy(s => s, StringComparer.Ordinal)
+                .ToArray();
 
-            for (int i = 0; i <= Input.Length; i++)
-            {
-                if (i == Input.Length || Input[i] == ',')
-                {
-                    if (inSurname)
-                    {
-                        string surname = Input.Substring(start, i - start).Trim();
-                        if (surname.Length > 0 && !ContainsSurname(temp, surnameCount, surname))
-                        {
-                            temp[surnameCount++] = surname;
-                        }
-                        inSurname = false;
-                    }
-                    if (i < Input.Length && Input[i] == ',') start = i + 1;
-                }
-                else if (!char.IsWhiteSpace(Input[i]) && !inSurname)
-                {
-                    start = i;
-                    inSurname = true;
-                }
-            }
-
-            var output = new string[surnameCount];
-            Array.Copy(temp, output, surnameCount);
-
-            for (int i = 0; i < output.Length - 1; i++)
-            {
-                for (int j = 0; j < output.Length - i - 1; j++)
-                {
-                    if (string.Compare(output[j], output[j + 1], StringComparison.Ordinal) > 0)
-                    {
-                        string tempSurname = output[j];
-                        output[j] = output[j + 1];
-                        output[j + 1] = tempSurname;
-                    }
-                }
-            }
-
-            Output = output;
-        }
-
-        private bool ContainsSurname(string[] surnames, int count, string surname)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                if (string.Equals(surnames[i], surname, StringComparison.Ordinal))
-                    return true;
-            }
-            return false;
+            Output = surnames;
         }
 
         public override string ToString()

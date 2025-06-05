@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Linq;
 
 namespace Lab_8
 {
@@ -27,7 +28,7 @@ namespace Lab_8
 
         public Green_1(string input) : base(input)
         {
-            Review(); // Вызов анализа после инициализации
+            Review();
         }
 
         public override void Review()
@@ -36,7 +37,7 @@ namespace Lab_8
 
             if (string.IsNullOrEmpty(Input))
             {
-                Output = new (char, double)[0];
+                Output = null;
                 return;
             }
 
@@ -63,21 +64,11 @@ namespace Lab_8
                 return;
             }
 
-            int resultCount = 0;
-            for (int i = 0; i < counts.Length; i++)
-            {
-                if (counts[i] > 0) resultCount++;
-            }
-
-            var output = new (char, double)[resultCount];
-            int index = 0;
-            for (int i = 0; i < russianLetters.Length; i++)
-            {
-                if (counts[i] > 0)
-                {
-                    output[index++] = (russianLetters[i], (double)counts[i] / totalLetters);
-                }
-            }
+            var output = russianLetters
+                .Select((c, i) => (c, (double)counts[i] / totalLetters))
+                .Where(x => x.Item2 > 0)
+                .OrderBy(x => x.c)
+                .ToArray();
 
             Output = output;
         }

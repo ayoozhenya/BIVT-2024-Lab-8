@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Text;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Lab_8
 {
@@ -25,7 +27,7 @@ namespace Lab_8
         public Green_3(string input, string given) : base(input)
         {
             _given = given ?? throw new ArgumentNullException(nameof(given));
-            Review(); // Вызов анализа после инициализации полей
+            Review();
         }
 
         public override void Review()
@@ -33,7 +35,7 @@ namespace Lab_8
             if (_outputSet) return;
             if (string.IsNullOrEmpty(Input) || string.IsNullOrEmpty(_given))
             {
-                Output = new string[0];
+                Output = null;
                 return;
             }
 
@@ -41,50 +43,20 @@ namespace Lab_8
             string given = _given.ToLower().Trim();
             char[] delimiters = { ' ', '.', '!', '?', ',', ':', '\"', ';', '–', '(', ')', '[', ']', '{', '}', '/' };
 
-            string[] temp = new string[Input.Length];
-            int wordCount = 0;
-
+            var words = new List<string>();
             int start = 0;
             bool inWord = false;
+
             for (int i = 0; i <= text.Length; i++)
             {
-                if (i == text.Length)
+                if (i == text.Length || delimiters.Contains(text[i]))
                 {
                     if (inWord)
                     {
                         string word = text.Substring(start, i - start);
-                        if (ContainsSubstring(word, given))
+                        if (word.Contains(given) && !words.Contains(word))
                         {
-                            if (!ContainsWord(temp, wordCount, word))
-                            {
-                                temp[wordCount++] = word;
-                            }
-                        }
-                    }
-                    break;
-                }
-
-                bool isDelimiter = false;
-                foreach (char d in delimiters)
-                {
-                    if (text[i] == d)
-                    {
-                        isDelimiter = true;
-                        break;
-                    }
-                }
-
-                if (isDelimiter)
-                {
-                    if (inWord)
-                    {
-                        string word = text.Substring(start, i - start);
-                        if (ContainsSubstring(word, given))
-                        {
-                            if (!ContainsWord(temp, wordCount, word))
-                            {
-                                temp[wordCount++] = word;
-                            }
+                            words.Add(word);
                         }
                         inWord = false;
                     }
@@ -96,37 +68,7 @@ namespace Lab_8
                 }
             }
 
-            Output = new string[wordCount];
-            Array.Copy(temp, Output, wordCount);
-        }
-
-        private bool ContainsSubstring(string word, string substring)
-        {
-            if (substring.Length > word.Length) return false;
-
-            for (int i = 0; i <= word.Length - substring.Length; i++)
-            {
-                bool match = true;
-                for (int j = 0; j < substring.Length; j++)
-                {
-                    if (word[i + j] != substring[j])
-                    {
-                        match = false;
-                        break;
-                    }
-                }
-                if (match) return true;
-            }
-            return false;
-        }
-
-        private bool ContainsWord(string[] words, int count, string word)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                if (words[i] == word) return true;
-            }
-            return false;
+            Output = words.ToArray();
         }
 
         public override string ToString()

@@ -24,7 +24,7 @@ namespace Lab_8
 
         public Green_2(string input) : base(input)
         {
-            Review(); // Вызов анализа после инициализации
+            Review();
         }
 
         public override void Review()
@@ -33,64 +33,51 @@ namespace Lab_8
 
             if (string.IsNullOrEmpty(Input))
             {
-                Output = new char[0];
+                Output = Array.Empty<char>();
                 return;
             }
 
             string text = Input.ToLower();
-            char[] delimiters = { ' ', '.', '!', '?', ',', ':', '\"', ';', '–', '(', ')', '[', ']', '{', '}', '/' };
+            char[] delimiters = { ' ', '.', '!', '?', ',', ':', '\"', ';', '–', '-', '(', ')', '[', ']', '{', '}', '/', '<', '>', '«', '»' };
             Dictionary<char, int> counts = new Dictionary<char, int>();
-            int totalWords = 0;
 
             bool inWord = false;
             char firstChar = '\0';
+
             foreach (char c in text + " ")
             {
-                bool isDelimiter = false;
-                foreach (char d in delimiters)
-                {
-                    if (c == d)
-                    {
-                        isDelimiter = true;
-                        break;
-                    }
-                }
+                bool isDelimiter = delimiters.Contains(c);
 
-                if (isDelimiter || c == ' ')
+                if (isDelimiter || c == ' ' || c == '\t' || c == '\n')
                 {
-                    if (inWord && firstChar != '\0')
+                    if (inWord && firstChar != '\0' && char.IsLetter(firstChar))
                     {
                         if (counts.ContainsKey(firstChar))
                             counts[firstChar]++;
                         else
                             counts[firstChar] = 1;
-                        totalWords++;
                     }
                     inWord = false;
                     firstChar = '\0';
                 }
-                else if (!inWord)
+                else if (!inWord && char.IsLetter(c))
                 {
                     firstChar = c;
                     inWord = true;
                 }
             }
 
-            if (totalWords == 0)
+            if (counts.Count == 0)
             {
-                Output = new char[0];
+                Output = Array.Empty<char>();
                 return;
             }
 
-            var letters = counts.ToList();
-            letters.Sort((a, b) =>
-            {
-                int cmp = b.Value.CompareTo(a.Value);
-                if (cmp == 0) return a.Key.CompareTo(b.Key);
-                return cmp;
-            });
-
-            Output = letters.Select(x => x.Key).ToArray();
+            Output = counts
+                .OrderByDescending(pair => pair.Value)  
+                .ThenBy(pair => pair.Key)               
+                .Select(pair => pair.Key)
+                .ToArray();
         }
 
         public override string ToString()
@@ -98,13 +85,7 @@ namespace Lab_8
             if (_output == null || _output.Length == 0)
                 return string.Empty;
 
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < _output.Length; i++)
-            {
-                if (i > 0) sb.Append(", ");
-                sb.Append(_output[i]);
-            }
-            return sb.ToString();
+            return string.Join(", ", _output);
         }
     }
 }
